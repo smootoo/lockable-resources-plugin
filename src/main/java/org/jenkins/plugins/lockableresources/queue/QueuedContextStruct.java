@@ -38,6 +38,11 @@ public class QueuedContextStruct implements Serializable {
 	private String resourceDescription;
 
 	/*
+	 * Priority this context should have in the queue. Lowest priority being 0.
+	 */
+	private int queuePriority = 0;
+
+	/*
 	 * Constructor for the QueuedContextStruct class.
 	 */
 	public QueuedContextStruct(StepContext context, LockableResourcesStruct lockableResourcesStruct, String resourceDescription) {
@@ -45,7 +50,20 @@ public class QueuedContextStruct implements Serializable {
 		this.lockableResourcesStruct = lockableResourcesStruct;
 		this.resourceDescription = resourceDescription;
 	}
-	
+
+	/*
+	 * Constructor for the QueuedContextStruct class.
+	 */
+	public QueuedContextStruct(StepContext context,
+							   LockableResourcesStruct lockableResourcesStruct,
+							   String resourceDescription,
+							   int queuePriority) {
+		this.context = context;
+		this.lockableResourcesStruct = lockableResourcesStruct;
+		this.resourceDescription = resourceDescription;
+		this.queuePriority = queuePriority;
+	}
+
 	/*
 	 * Gets the pipeline step context.
 	 */
@@ -66,6 +84,10 @@ public class QueuedContextStruct implements Serializable {
 	public String getResourceDescription() {
 		return this.resourceDescription;
 	}
-	
+
+	public int getQueuePriority() {
+		return this.queuePriority;
+	}
+
 	private static final long serialVersionUID = 1L;
 }
