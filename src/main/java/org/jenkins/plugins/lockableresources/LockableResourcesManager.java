@@ -572,27 +572,14 @@ public class LockableResourcesManager extends GlobalConfiguration {
 		// start with an empty set of selected resources
 		List<LockableResource> selected = new ArrayList<LockableResource>();
 
-		// some resources might be already locked, but will be freeed.
-		// Determine if these resources can be reused
-		if (lockedResourcesAboutToBeUnlocked != null) {
-			for (LockableResource candidate : candidates) {
-				if (lockedResourcesAboutToBeUnlocked.contains(candidate.getName())) {
-					selected.add(candidate);
-				}
-			}
-			// if none of the currently locked resources can be reussed,
-			// this context is not suitable to be continued with
-			if (selected.size() == 0) {
-				return null;
-			}
-		}
-
-		for (LockableResource rs : candidates) {
+		// Check resource candidates to if they are not reserved and not locked or are about to be unlocked
+		for (LockableResource candidate : candidates) {
 			if (selected.size() >= requiredAmount) {
 				break;
 			}
-			if (!rs.isReserved() && !rs.isLocked()) {
-				selected.add(rs);
+			if ((!candidate.isReserved() && !candidate.isLocked()) ||
+					(lockedResourcesAboutToBeUnlocked != null && lockedResourcesAboutToBeUnlocked.contains(candidate.getName()))) {
+				selected.add(candidate);
 			}
 		}
 
@@ -610,14 +597,25 @@ public class LockableResourcesManager extends GlobalConfiguration {
 	 * Adds the given context and the required resources to the queue if
 	 * this context is not yet queued.
 	 */
-	public synchronized void queueContext(StepContext context, LockableResourcesStruct requiredResources, String resourceDescription) {
+	public synchronized void queueContext(StepContext context, LockableResourcesStruct requiredResources, String resourceDescription, int queuePriority) {
+		int priorityQueueIndex = 0;
+		// Scanning through the whole queue to find if the context is a duplicate
+		// so search for where the insertion point would be if a non zero priority were specified
 		for (QueuedContextStruct entry : this.queuedContexts) {
 			if (entry.getContext() == context) {
 				return;
 			}
+			if (entry.getQueuePriority() >= queuePriority) {
+				priorityQueueIndex++;
+			}
 		}
 
-		this.queuedContexts.add(new QueuedContextStruct(context, requiredResources, resourceDescription));
+		if (queuePriority == 0)
+			// Priority of 0 is the lowest priority, so can safely add to the end of the queue
+			this.queuedContexts.add(new QueuedContextStruct(context, requiredResources, resourceDescription));
+		else
+			// add into the queue to maintain priority ordering
+			this.queuedContexts.add(priorityQueueIndex, new QueuedContextStruct(context, requiredResources, resourceDescription, queuePriority));
 		save();
 	}
 
