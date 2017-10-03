@@ -49,6 +49,7 @@ public class LockStepExecution extends AbstractStepExecutionImpl {
 		}
 		LockableResourcesStruct resourceHolder = new LockableResourcesStruct(resources, step.label, step.quantity);
 		// determine if there are enough resources available to proceed
+		// TODO Sue, checkout locking on the below steps
 		List<LockableResource> available = LockableResourcesManager.get().checkResourcesAvailability(resourceHolder, listener.getLogger(), null);
         if (available == null || !LockableResourcesManager.get().lock(available, run, getContext(), step.toString(), step.inversePrecedence, step.variable)) {
 			listener.getLogger().println("[" + step + "] is locked, waiting...");
