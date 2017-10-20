@@ -31,6 +31,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 public class LockStepTest {
@@ -613,6 +614,7 @@ public class LockStepTest {
 				));
 				WorkflowRun b1 = p.scheduleBuild2(0).waitForStart();
 				SemaphoreStep.waitForStart("wait-inside/1", b1);
+				story.j.waitForMessage("Lock acquired on [resource1]", b1);
 
 				FreeStyleProject f = story.j.createFreeStyleProject("f");
 				f.addProperty(new RequiredResourcesProperty("resource1", null, null, null));
@@ -623,6 +625,7 @@ public class LockStepTest {
 					System.out.println("Waiting for freestyle to be queued...");
 					Thread.sleep(1000);
 				}
+				Thread.sleep(3000);
 			}
 		});
 
@@ -676,7 +679,9 @@ public class LockStepTest {
 				story.j.assertLogContains("got resource:[ resource0 ]", b1);
 
                 story.j.assertLogContains("Lock released on resource [Label: res, Variable: MY_VAR]", b1);
-                story.j.assertLogContains("got resources:[ resource1, resource2, resource3 ]", b1);
+                story.j.assertLogContains("resource1", b1);
+				story.j.assertLogContains("resource2", b1);
+				story.j.assertLogContains("resource3", b1);
 			}
 		});
 	}
@@ -830,6 +835,8 @@ public class LockStepTest {
 								+ "  semaphore 'wait-inside'\n"
 								+ "}"));
 				WorkflowRun b2 = p2.scheduleBuild2(0).waitForStart();
+				story.j.waitForMessage("[resource1] is locked, waiting...", b2);
+
 
 				// Now b2 is still sitting waiting for a lock. Create b3 and launch it to clear the lock.
 				WorkflowJob p3 = story.j.jenkins.createProject(WorkflowJob.class, "p3");
@@ -841,7 +848,6 @@ public class LockStepTest {
 
 
 				// Make sure that b2 is blocked on b1's lock.
-				story.j.waitForMessage("[resource1] is locked, waiting...", b2);
 				story.j.waitForMessage("[resource1] is locked, waiting...", b3);
 
 				b1.delete();
