@@ -813,7 +813,6 @@ public class LockStepTest {
 	// a result of the first build being deleted and is nothing but noise here.
 	@Issue("JENKINS-36479")
 	@Test public void deleteRunningBuildNewBuildClearsLock() throws Exception {
-		assumeFalse(Functions.isWindows()); // TODO: Investigate failure on Windows.
 		story.addStep(new Statement() {
 			@Override public void evaluate() throws Throwable {
 				LockableResourcesManager.get().createResource("resource1");
