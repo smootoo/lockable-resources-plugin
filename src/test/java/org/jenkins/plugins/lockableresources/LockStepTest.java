@@ -830,6 +830,9 @@ public class LockStepTest {
 								+ "}"));
 				WorkflowRun b2 = p2.scheduleBuild2(0).waitForStart();
 
+				// Make sure that b2 is blocked on b1's lock.
+				story.j.waitForMessage("[resource1] is locked, waiting...", b2);
+
 				// Now b2 is still sitting waiting for a lock. Create b3 and launch it to clear the lock.
 				WorkflowJob p3 = story.j.jenkins.createProject(WorkflowJob.class, "p3");
 				p3.setDefinition(new CpsFlowDefinition(
@@ -839,8 +842,6 @@ public class LockStepTest {
 				WorkflowRun b3 = p3.scheduleBuild2(0).waitForStart();
 
 
-				// Make sure that b2 is blocked on b1's lock.
-				story.j.waitForMessage("[resource1] is locked, waiting...", b2);
 				story.j.waitForMessage("[resource1] is locked, waiting...", b3);
 
 				b1.delete();
