@@ -12,3 +12,9 @@ install:
 
 build_script:
   - mvn clean install -B -Dci
+
+cache:
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  # Cache Maven and .m2
+  - '%MAVEN_HOME%'
+  - '%M2%'
