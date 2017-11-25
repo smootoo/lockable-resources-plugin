@@ -676,7 +676,7 @@ public class LockStepTest {
 				story.j.assertLogContains("got resource:[ resource0 ]", b1);
 
                 story.j.assertLogContains("Lock released on resource [Label: res, Variable: MY_VAR]", b1);
-                story.j.assertLogContains("got resources:[ resource1, resource2, resource3 ]", b1);
+		story.j.assertLogContains("got resources:[ resource", b1);
 			}
 		});
 	}
