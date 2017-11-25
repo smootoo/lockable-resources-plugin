@@ -26,6 +26,7 @@ import org.jvnet.hudson.test.TestBuilder;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 public class FreeStyleBuildTest {
@@ -53,25 +54,41 @@ public class FreeStyleBuildTest {
 						try {
 							FilePath script = createScriptFile(ws);
 							EnvVars envVars = new EnvVars();
+							if (ws != null) {
+								envVars.put("WORKSPACE", ws.getRemote());
+							}
+
 							f.getScm().buildEnvVars(build, envVars);
-//			    Iterator i$;
-//			    if (f.buildEnvironments != null) {
-//			      i$ = this.buildEnvironments.iterator();
-//
-//			      while(i$.hasNext()) {
-//			        Environment e = (Environment)i$.next();
-//			        e.buildEnvVars(env);
-//			      }
-//			    }
-//
-//			    i$ = this.getActions(EnvironmentContributingAction.class).iterator();
-//
-//			    while(i$.hasNext()) {
-//			      EnvironmentContributingAction a = (EnvironmentContributingAction)i$.next();
-//			      a.buildEnvVars(this, env);
-//			    }
+							Iterator i$ = build.getEnvironments().iterator();
+							while (i$.hasNext()) {
+								Environment e = (Environment) i$.next();
+								e.buildEnvVars(envVars);
+							}
+
+			    i$ = build.getActions(EnvironmentContributingAction.class).iterator();
+
+			    while(i$.hasNext()) {
+			      EnvironmentContributingAction a = (EnvironmentContributingAction)i$.next();
+			      a.buildEnvVars(build, envVars);
+			    }
+							envVars.put("CLASSPATH", "");
+			    i$ = EnvironmentContributor.all().reverseView().iterator();
+
+			    while(i$.hasNext()) {
+			      EnvironmentContributor ec = (EnvironmentContributor)i$.next();
+			      ec.buildEnvironmentFor(build, envVars, listener);
+			    }
+
+
 
 			    EnvVars.resolve(envVars);
+							i$ = build.getBuildVariables().entrySet().iterator();
+
+							while (i$.hasNext()) {
+								Map.Entry<String, String> e = (Map.Entry) i$.next();
+								envVars.put((String) e.getKey(), (String) e.getValue());
+							}
+
 
 							int r = join(launcher.launch().cmds(this.buildCommandLine(script)).envs(envVars).stdout(listener).pwd(ws).start());
 													} catch (IOException e) {
