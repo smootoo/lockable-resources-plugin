@@ -66,7 +66,9 @@ public class LockStep extends AbstractStepImpl implements Serializable {
 
 	@DataBoundSetter
 	public void setVariable(String variable) {
-		this.variable = variable;
+		if (variable != null && !variable.isEmpty()) {
+			this.variable = variable;
+		}
 	}
 
 	@Extension

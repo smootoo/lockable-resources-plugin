@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import hudson.EnvVars;
 import org.jenkins.plugins.lockableresources.queue.LockableResourcesStruct;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 
 import hudson.model.Run;
@@ -24,6 +25,8 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 public class LockStepExecution extends AbstractStepExecutionImpl {
+    @Inject(optional = true)
+	private static final Joiner COMMA_JOINER = Joiner.on(',');
 
 	@Inject(optional = true)
 	private LockStep step;
